@@ -1,0 +1,3 @@
+function main(arg : i32, args : i32) {
+    string b = "Hello world";
+}
