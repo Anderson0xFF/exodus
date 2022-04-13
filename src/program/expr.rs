@@ -38,7 +38,7 @@ pub enum Expr {
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum Prefix {
-    NOT,  // !
+    NOT,     // !
     POINTER, // *
 }
 

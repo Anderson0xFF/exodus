@@ -21,20 +21,89 @@ pub enum Type{
 }
 
 #[derive(Debug, PartialEq, Clone)]
-pub enum Operator {
+pub enum Relational{
+    LT,
+    GT,
+    EQ,
+    NOT_EQ
+}
+
+
+impl ToString for Relational {
+    fn to_string(&self) -> String{
+        match self{
+            Relational::LT => "+".to_string(),
+            Relational::GT => "-".to_string(),
+            Relational::EQ => "/".to_string(),
+            Relational::NOT_EQ => "*".to_string(),
+        }
+    }
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub enum Arithmetic{
     ADD, 
     SUB,
     MUL,
     DIV,
     MOD,
+}
+
+impl ToString for Arithmetic {
+    fn to_string(&self) -> String{
+        match self{
+            Arithmetic::ADD => "+".to_string(),
+            Arithmetic::SUB => "-".to_string(),
+            Arithmetic::DIV => "/".to_string(),
+            Arithmetic::MUL => "*".to_string(),
+            Arithmetic::MOD => "%".to_string(),
+        }
+    }
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub enum Logical{
     XOR,
-    REF,
-    LT,
-    GT,
     AND, 
     OR,
-    EQ,
-    NOT_EQ
+    NOT,
+}
+
+
+impl ToString for Logical {
+    fn to_string(&self) -> String{
+        match self{
+            Logical::XOR => "^".to_string(),
+            Logical::AND => "&&".to_string(),
+            Logical::OR => "||".to_string(),
+            Logical::NOT => "!".to_string(),
+        }
+    }
+}
+
+
+#[derive(Debug, PartialEq, Clone)]
+pub enum Operator {
+    ARITHMETIC(Arithmetic),
+    RELATIONAL(Relational),
+    LOGICAL(Logical),
+    //REF,
+}
+
+impl Operator {
+    pub fn is_relational(&self) -> bool {
+        match self {
+            Operator::RELATIONAL(_) => true,
+            _=> false
+        }
+    }
+
+    pub fn is_logical(&self) -> bool {
+        match self {
+            Operator::LOGICAL(_) => true,
+            _=> false
+        }
+    }
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -72,12 +141,10 @@ pub enum Token {
     STRING(String),
     #[token("=")]
     ASSIGN,
-    #[regex("\\^|\\+|\\-|/|%|\\&|<|>|\\&&|==|!=|\\*|\\|\\|", Token::as_operator)]
+    #[regex("\\^|\\+|\\-|/|%|\\&|<|>|\\&&|==|!=|\\*|\\|\\||!", Token::as_operator)]
     OPERATOR(Operator),
     #[token(".")]
     DOT,
-    #[token("!")]
-    BANG,
     #[token(",")]
     COMMA,
     #[token(":")]
@@ -157,19 +224,20 @@ impl Token {
 
     pub fn as_operator(lex: &mut Lexer<Token>) -> Option<Operator>{
         match lex.slice() {
-            "+" => Some(Operator::ADD),
-            "-" => Some(Operator::SUB),
-            "*" => Some(Operator::MUL),
-            "/" => Some(Operator::DIV),
-            "%" => Some(Operator::MOD),
-            "&" => Some(Operator::REF),
-            "<" => Some(Operator::LT),
-            ">" => Some(Operator::GT),
-            "^" => Some(Operator::XOR),
-            "&&" => Some(Operator::AND),
-            "||" => Some(Operator::OR),
-            "==" => Some(Operator::EQ),
-            "!=" => Some(Operator::NOT_EQ),
+            "+" => Some(Operator::ARITHMETIC(Arithmetic::ADD)),
+            "-" => Some(Operator::ARITHMETIC(Arithmetic::SUB)),
+            "*" => Some(Operator::ARITHMETIC(Arithmetic::MUL)),
+            "/" => Some(Operator::ARITHMETIC(Arithmetic::DIV)),
+            "%" => Some(Operator::ARITHMETIC(Arithmetic::MOD)),
+           // "&" => Some(Operator::ARITHMETIC(REF)),
+            "<" => Some(Operator::RELATIONAL(Relational::LT)),
+            ">" => Some(Operator::RELATIONAL(Relational::GT)),
+            "==" => Some(Operator::RELATIONAL(Relational::EQ)),
+            "!=" => Some(Operator::RELATIONAL(Relational::NOT_EQ)),
+            //"^" => Some(Operator::ARITHMETIC(XOR)),
+            "&&" => Some(Operator::LOGICAL(Logical::AND)),
+            "||" => Some(Operator::LOGICAL(Logical::OR)),
+            "!" => Some(Operator::LOGICAL(Logical::NOT)),
             _=> {
                 println!("Invalid operator {}", lex.slice());
                 None
@@ -203,19 +271,9 @@ impl ToString for Statement {
 impl ToString for Operator {
     fn to_string(&self) -> String{
         match self {
-            Operator::ADD => "+".to_string(),
-            Operator::SUB => "-".to_string(),
-            Operator::DIV => "/".to_string(),
-            Operator::MUL => "*".to_string(),
-            Operator::MOD => "%".to_string(),
-            Operator::XOR => "^".to_string(),
-            Operator::REF => "&".to_string(),
-            Operator::LT => "<".to_string(),
-            Operator::GT => ">".to_string(),
-            Operator::AND => "&&".to_string(), 
-            Operator::OR => "||".to_string(),
-            Operator::EQ => "==".to_string(),
-            Operator::NOT_EQ => "!=".to_string()
+            Operator::ARITHMETIC(op) => op.to_string(),
+            Operator::LOGICAL(op) => op.to_string(),
+            Operator::RELATIONAL(op) => op.to_string(),
         }
     }
 }
@@ -255,7 +313,6 @@ impl ToString for Token {
             Token::STATEMENT(statement) => statement.to_string(),
             Token::ASSIGN => "=".to_string(),
             Token::DOT => ".".to_string(),
-            Token::BANG => "!".to_string(),
             Token::COMMA => ",".to_string(),
             Token::COLON => ":".to_string(),
             Token::SEMICOLON => ";".to_string(),

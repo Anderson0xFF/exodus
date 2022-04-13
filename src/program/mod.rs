@@ -5,8 +5,8 @@
 use self::state::State;
 
 pub mod expr;
-pub mod types;
 pub mod state;
+pub mod types;
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Program {
@@ -26,5 +26,9 @@ impl Program {
     /// Get a mutable reference to the program's state.
     pub fn state_mut(&mut self) -> &mut Vec<State> {
         &mut self.state
+    }
+
+    pub fn compile(lexer : logos::Lexer<lexer::Token>){
+        
     }
 }

@@ -6,12 +6,12 @@ use super::{expr::Expr, types::Type};
 pub enum State {
     Class {
         name: String,
-        atributes: HashMap<String, Type>,
+        atributes: HashMap<String, super::types::Type>,
         body: Vec<Expr>,
     },
     Function {
         name: String,
-        parameters: HashMap<String, Type>,
+        parameters: HashMap<String, super::types::Type>,
         body: Vec<Expr>,
     },
 
